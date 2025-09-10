@@ -1,0 +1,43 @@
+{
+  "name": "ra-devs/jwt-auth",
+  "description": "Universal JWT auth for Laravel (tymon/jwt-auth + ra-devs/api-json-response)",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "RaDevs(Max Yastremskyi)",
+      "email": "m.yastremskyj@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "RaDevs\\JwtAuth\\": "src/"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "RaDevs\\JwtAuth\\Providers\\JwtAuthServiceProvider"
+      ]
+    }
+  },
+  "require": {
+    "php": ">=8.1",
+    "illuminate/support": ">=10.0",
+    "illuminate/http": ">=10.0",
+    "illuminate/notifications": ">=10.0",
+    "illuminate/validation": ">=10.0",
+    "illuminate/database": ">=10.0",
+    "illuminate/mail": ">=10.0",
+    "tymon/jwt-auth": "^2.0",
+    "ra-devs/api-json-response": "^1.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^8.0|^9.0"
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
