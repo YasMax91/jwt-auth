@@ -99,6 +99,7 @@ class ComposerStaticInitfb1946c307a494211cbf2ec76e5da38a
         array (
             'Ramsey\\Uuid\\' => 12,
             'Ramsey\\Collection\\' => 18,
+            'RaDevs\\JwtAuth\\Tests\\' => 21,
             'RaDevs\\JwtAuth\\' => 15,
             'RaDevs\\ApiJsonResponse\\' => 23,
         ),
@@ -339,6 +340,10 @@ class ComposerStaticInitfb1946c307a494211cbf2ec76e5da38a
         'Ramsey\\Collection\\' => 
         array (
             0 => __DIR__ . '/..' . '/ramsey/collection/src',
+        ),
+        'RaDevs\\JwtAuth\\Tests\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/tests',
         ),
         'RaDevs\\JwtAuth\\' => 
         array (

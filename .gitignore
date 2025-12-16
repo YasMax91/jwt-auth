@@ -1,0 +1,17 @@
+.idea
+.claude
+
+# Composer
+/vendor/
+composer.lock
+
+# Testing
+.phpunit.cache/
+build/
+coverage/
+*.coverage
+*.cache
+
+# OS
+.DS_Store
+Thumbs.db

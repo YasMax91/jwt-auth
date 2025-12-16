@@ -1,0 +1,530 @@
+openapi: 3.0.3
+info:
+  title: RA Devs JWT Auth API
+  description: |
+    Universal JWT authentication API for Laravel applications.
+
+    ## Features
+    - Login / Logout / Register
+    - Token Refresh via HTTP-only cookies
+    - Password Reset via 8-character alphanumeric codes
+    - Rate limiting on all endpoints
+    - Security event logging
+
+    ## Authentication
+    Most endpoints require a Bearer token in the Authorization header:
+    ```
+    Authorization: Bearer {access_token}
+    ```
+  version: 1.0.0
+  contact:
+    name: RA Devs
+    email: m.yastremskyj@gmail.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost/api/auth
+    description: Local development server
+  - url: https://api.example.com/api/auth
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication operations
+  - name: Password Reset
+    description: Password reset operations
+
+paths:
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticate user with email and password. Returns JWT access token and sets HTTP-only refresh token cookie.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              description: HTTP-only refresh token cookie
+              schema:
+                type: string
+                example: refresh_token=eyJ0eXAiOi...; HttpOnly; Secure; SameSite=Lax
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/InvalidCredentials'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /register:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: Create a new user account with validation.
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user
+      description: Retrieve the authenticated user's profile information.
+      operationId: me
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Logout the current user and revoke refresh token.
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Generate a new access token using the refresh token from cookie.
+      operationId: refresh
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '403':
+          $ref: '#/components/responses/InvalidToken'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /forgot-password:
+    post:
+      tags:
+        - Password Reset
+      summary: Request password reset
+      description: Send a password reset code to the user's email (8-character alphanumeric code).
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Reset code sent (generic response for security)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /reset-password:
+    post:
+      tags:
+        - Password Reset
+      summary: Reset password
+      description: Reset user password using the reset code sent via email.
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/InvalidResetCode'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: refresh_token
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        password:
+          type: string
+          format: password
+          minLength: 6
+          example: password123
+
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - last_name
+        - email
+        - phone
+        - password
+        - password_confirmation
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: John
+        last_name:
+          type: string
+          maxLength: 255
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        phone:
+          type: string
+          pattern: '^\+[0-9]{10,15}$'
+          example: '+1234567890'
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: Must contain uppercase, lowercase, numbers, and symbols
+          example: Password123!
+        password_confirmation:
+          type: string
+          format: password
+          example: Password123!
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: john@example.com
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - email
+        - code
+        - password
+        - password_confirmation
+      properties:
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        code:
+          type: string
+          minLength: 8
+          maxLength: 8
+          pattern: '^[A-Z2-9]{8}$'
+          example: ABCD1234
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: NewPassword123!
+        password_confirmation:
+          type: string
+          format: password
+          example: NewPassword123!
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+
+    Token:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+        token_type:
+          type: string
+          example: bearer
+        expires_in:
+          type: integer
+          description: Token expiration time in seconds
+          example: 3600
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: The user has been successfully logged in
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            token:
+              $ref: '#/components/schemas/Token'
+
+    RegisterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: The user has been successfully registered
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+
+    UserResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: The user has been successfully shown
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: Operation completed successfully
+        data:
+          type: object
+          example: {}
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        status:
+          type: string
+          example: error
+        message:
+          type: string
+          example: Error description
+        data:
+          type: object
+          properties:
+            error_code:
+              type: string
+              example: ERROR_CODE
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Invalid or missing authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            status: error
+            message: Unauthenticated
+            data:
+              error_code: UNAUTHORIZED
+
+    InvalidCredentials:
+      description: Invalid credentials provided
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            status: error
+            message: Invalid credentials provided
+            data:
+              error_code: INVALID_CREDENTIALS
+
+    UserNotFound:
+      description: User not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            status: error
+            message: User not found
+            data:
+              error_code: USER_NOT_FOUND
+
+    InvalidToken:
+      description: Invalid or expired token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            status: error
+            message: Token is invalid or expired
+            data:
+              error_code: INVALID_TOKEN
+
+    InvalidResetCode:
+      description: Invalid or expired password reset code
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            status: error
+            message: The password reset code has expired or is invalid
+            data:
+              error_code: PASSWORD_RESET_CODE_INVALID
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              status:
+                type: string
+                example: error
+              message:
+                type: string
+                example: Validation error
+              errors:
+                type: object
+                example:
+                  email: ["The email field is required."]
+
+    TooManyRequests:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            status: error
+            message: Too many requests. Please try again later.
+            data:
+              error_code: RATE_LIMIT_EXCEEDED

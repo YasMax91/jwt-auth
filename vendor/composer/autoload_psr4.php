@@ -43,6 +43,7 @@ return array(
     'Symfony\\Component\\Clock\\' => array($vendorDir . '/symfony/clock'),
     'Ramsey\\Uuid\\' => array($vendorDir . '/ramsey/uuid/src'),
     'Ramsey\\Collection\\' => array($vendorDir . '/ramsey/collection/src'),
+    'RaDevs\\JwtAuth\\Tests\\' => array($baseDir . '/tests'),
     'RaDevs\\JwtAuth\\' => array($baseDir . '/src'),
     'RaDevs\\ApiJsonResponse\\' => array($vendorDir . '/ra-devs/api-json-response/src'),
     'Psy\\' => array($vendorDir . '/psy/psysh/src'),

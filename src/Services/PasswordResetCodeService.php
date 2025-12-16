@@ -7,6 +7,8 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use RaDevs\JwtAuth\Exceptions\PasswordResetException;
+use RaDevs\JwtAuth\Exceptions\UserNotFoundException;
 use RaDevs\JwtAuth\Models\PasswordResetCode;
 
 
@@ -32,7 +34,7 @@ class PasswordResetCodeService
     {
         $last = PasswordResetCode::where('email', mb_strtolower($email))->latest('id')->first();
         if ($last && $last->created_at->diffInSeconds(now()) < 60) {
-            throw ValidationException::withMessages(['email' => 'Please wait before requesting another code.']);
+            throw PasswordResetException::rateLimited();
         }
 
 
@@ -96,14 +98,14 @@ class PasswordResetCodeService
 
 
             if (!$record) {
-                throw ValidationException::withMessages(['code' => 'The password reset code has expired.']);
+                throw PasswordResetException::codeExpired();
             }
             if ($record->attempts >= $record->max_attempts) {
-                throw ValidationException::withMessages(['code' => 'Too many attempts. Please request a new code.']);
+                throw PasswordResetException::tooManyAttempts();
             }
             if (!Hash::check(strtoupper($code), $record->code_hash)) {
                 $record->increment('attempts');
-                throw ValidationException::withMessages(['code' => 'Invalid password reset code.']);
+                throw PasswordResetException::codeInvalid();
             }
 
 
@@ -113,7 +115,7 @@ class PasswordResetCodeService
             $userModel = config('ra-jwt-auth.classes.user_model');
             $user = $userModel::where('email', mb_strtolower($email))->first();
             if (!$user) {
-                throw ValidationException::withMessages(['email' => 'User not found.']);
+                throw new UserNotFoundException();
             }
 
 

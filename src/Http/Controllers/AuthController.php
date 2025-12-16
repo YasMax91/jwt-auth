@@ -2,17 +2,22 @@
 
 namespace RaDevs\JwtAuth\Http\Controllers;
 
-
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpFoundation\Response;
+use RaDevs\JwtAuth\Exceptions\InvalidCredentialsException;
+use RaDevs\JwtAuth\Exceptions\InvalidTokenException;
+use RaDevs\JwtAuth\Exceptions\UserNotFoundException;
+use RaDevs\JwtAuth\Exceptions\PasswordResetException;
+use RaDevs\JwtAuth\Events\UserLoggedIn;
+use RaDevs\JwtAuth\Events\UserLoginFailed;
+use RaDevs\JwtAuth\Events\UserRegistered;
+use RaDevs\JwtAuth\Events\UserLoggedOut;
+use RaDevs\JwtAuth\Events\PasswordResetRequested;
+use RaDevs\JwtAuth\Events\PasswordResetCompleted;
 use RaDevs\JwtAuth\Repositories\Contracts\IAuthRepository;
 use RaDevs\JwtAuth\Repositories\Contracts\IUserRepository;
 use RaDevs\JwtAuth\Http\Requests\Auth\LoginRequest;
 use RaDevs\JwtAuth\Http\Requests\Auth\RegisterRequest;
 use RaDevs\JwtAuth\Http\Requests\Auth\ForgotRequest;
-use RaDevs\JwtAuth\Http\Requests\Auth\CanResetPasswordRequest;
 use RaDevs\JwtAuth\Http\Requests\Auth\ResetPasswordRequest;
 use RaDevs\JwtAuth\Http\Requests\Auth\RefreshTokenRequest;
 use RaDevs\JwtAuth\Services\PasswordResetCodeService;
@@ -35,12 +40,26 @@ class AuthController
 
         $user = $userRepository->getActivatedUserByField('email', $credentials['email']);
         if (!$user) {
-            return ApiJsonResponse::error('The user with email address you entered does not exist.', 404);
+            UserLoginFailed::dispatch(
+                $credentials['email'],
+                $request->ip(),
+                $request->userAgent() ?? 'Unknown',
+                'User not found'
+            );
+            throw new UserNotFoundException('The user with email address you entered does not exist');
         }
 
         if (!$token = $this->authRepository->attempt($credentials)) {
-            return ApiJsonResponse::error('Invalid credentials', 401);
+            UserLoginFailed::dispatch(
+                $credentials['email'],
+                $request->ip(),
+                $request->userAgent() ?? 'Unknown',
+                'Invalid credentials'
+            );
+            throw new InvalidCredentialsException();
         }
+
+        UserLoggedIn::dispatch($user, $request->ip(), $request->userAgent() ?? 'Unknown');
 
         return $this->authRepository->responseWithToken($token, 'The user has been successfully logged in');
     }
@@ -56,7 +75,16 @@ class AuthController
 
     public function logout(): JsonResponse
     {
+        $user = $this->authRepository->getAuthenticatedUserRaw();
         $this->authRepository->logout();
+
+        if ($user) {
+            UserLoggedOut::dispatch(
+                $user,
+                request()->ip(),
+                request()->userAgent() ?? 'Unknown'
+            );
+        }
 
         return ApiJsonResponse::success([], 'The user has been successfully logged out');
     }
@@ -68,12 +96,12 @@ class AuthController
         $token = $request->cookie($cookieName);
 
         if (!$token) {
-            return ApiJsonResponse::error('Token Invalid', Response::HTTP_FORBIDDEN);
+            throw new InvalidTokenException('Refresh token not found');
         }
 
         $user = $this->authRepository->checkRefreshToken($token);
         if (!$user) {
-            return ApiJsonResponse::error('Token Invalid', Response::HTTP_FORBIDDEN);
+            throw new InvalidTokenException('Invalid refresh token');
         }
 
         auth('api')->login($user);
@@ -89,6 +117,8 @@ class AuthController
     {
         $data = $request->validated();
         $user = $userRepository->create($data);
+
+        UserRegistered::dispatch($user, $request->ip(), $request->userAgent() ?? 'Unknown');
 
         $resourceClass = config('ra-jwt-auth.classes.user_resource', DefaultUserResource::class);
         $response['user'] = new $resourceClass($user);
@@ -110,17 +140,14 @@ class AuthController
 
         $ttlMinutes = (int) (config('auth.passwords.' . config('auth.defaults.passwords') . '.expire') ?? 60);
 
+        PasswordResetRequested::dispatch($email, $request->ip(), $request->userAgent() ?? 'Unknown');
 
-        try {
-            $this->passwordResetCodeService->issueCode(
-                email: $email,
-                ipAddress: $request->ip(),
-                userAgent: (string) $request->userAgent(),
-                ttlMinutes: $ttlMinutes,
-            );
-        } catch (ValidationException $e) {
-            return ApiJsonResponse::error($e->getMessage(), 429);
-        }
+        $this->passwordResetCodeService->issueCode(
+            email: $email,
+            ipAddress: $request->ip(),
+            userAgent: (string) $request->userAgent(),
+            ttlMinutes: $ttlMinutes,
+        );
 
         return ApiJsonResponse::success([], $genericMessage);
     }
@@ -135,25 +162,23 @@ class AuthController
         );
 
         if (!$isValid) {
-            ApiJsonResponse::error('The password reset code has expired or is invalid', 400);
+            throw PasswordResetException::codeInvalid();
         }
 
         // Ensure user exists (service will also validate, but this gives clearer 404)
         $userModel = config('ra-jwt-auth.classes.user_model');
         $user = $userModel::query()->where('email', mb_strtolower($data['email']))->first();
         if (!$user) {
-            return ApiJsonResponse::error('User with current email does not exist', 404);
+            throw new UserNotFoundException('User with current email does not exist');
         }
 
-        try {
-            $this->passwordResetCodeService->resetPassword(
-                email: $data['email'],
-                code: $data['code'],
-                newPassword: $data['password'],
-            );
-        } catch (ValidationException $validationException) {
-            return ApiJsonResponse::error($validationException->getMessage(), 400);
-        }
+        $this->passwordResetCodeService->resetPassword(
+            email: $data['email'],
+            code: $data['code'],
+            newPassword: $data['password'],
+        );
+
+        PasswordResetCompleted::dispatch($user, $request->ip(), $request->userAgent() ?? 'Unknown');
 
         return ApiJsonResponse::success([], 'Password reset was successful!');
     }

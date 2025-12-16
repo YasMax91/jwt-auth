@@ -21,6 +21,9 @@ class JwtAuthServiceProvider extends ServiceProvider
 
         $this->app->alias($classes['auth_repository'], 'ra.jwt-auth.repository');
         $this->app->alias($classes['password_reset_service'], 'ra.jwt-auth.password-reset-service');
+
+        // Register event service provider
+        $this->app->register(EventServiceProvider::class);
     }
 
 

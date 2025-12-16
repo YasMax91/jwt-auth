@@ -17,6 +17,11 @@
       "src/helpers.php"
     ]
   },
+  "autoload-dev": {
+    "psr-4": {
+      "RaDevs\\JwtAuth\\Tests\\": "tests/"
+    }
+  },
   "extra": {
     "laravel": {
       "providers": [
@@ -36,7 +41,13 @@
     "ra-devs/api-json-response": "^1.0"
   },
   "require-dev": {
-    "orchestra/testbench": "^8.0|^9.0"
+    "orchestra/testbench": "^8.0|^9.0",
+    "phpunit/phpunit": "^10.0",
+    "mockery/mockery": "^1.5"
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit",
+    "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
   },
   "minimum-stability": "stable",
   "prefer-stable": true
