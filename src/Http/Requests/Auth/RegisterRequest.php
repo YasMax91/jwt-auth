@@ -11,7 +11,7 @@ class RegisterRequest extends BaseApiRequest
 {
     public function rules(): array
     {
-        $userTable = (new (config('ra-jwt-auth.classes.user_model')))()->getTable();
+        $userTable = (new (config('ra-jwt-auth.classes.user_model')))->getTable();
 
         return [
             'email' => 'required|email:rfc,dns|unique:'.$userTable.',email',

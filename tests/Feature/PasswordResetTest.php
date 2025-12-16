@@ -60,7 +60,7 @@ class PasswordResetTest extends TestCase
     public function test_user_can_reset_password_with_valid_code(): void
     {
         $user = $this->createUser();
-        $code = 'ABCD1234';
+        $code = 'ABCD2345';
 
         PasswordResetCode::create([
             'email' => 'test@example.com',
@@ -75,8 +75,8 @@ class PasswordResetTest extends TestCase
         $response = $this->postJson('/api/auth/reset-password', [
             'email' => 'test@example.com',
             'code' => $code,
-            'password' => 'NewPassword123!',
-            'password_confirmation' => 'NewPassword123!',
+            'password' => 'N3wP@ssw0rdTst7Xq',
+            'password_confirmation' => 'N3wP@ssw0rdTst7Xq',
         ]);
 
         $response->assertStatus(200);
@@ -84,13 +84,13 @@ class PasswordResetTest extends TestCase
 
         // Verify password was changed
         $user->refresh();
-        $this->assertTrue(Hash::check('NewPassword123!', $user->password));
+        $this->assertTrue(Hash::check('N3wP@ssw0rdTst7Xq', $user->password));
     }
 
     public function test_user_cannot_reset_password_with_invalid_code(): void
     {
         $user = $this->createUser();
-        $code = 'ABCD1234';
+        $code = 'ABCD2345';
 
         PasswordResetCode::create([
             'email' => 'test@example.com',
@@ -104,9 +104,9 @@ class PasswordResetTest extends TestCase
 
         $response = $this->postJson('/api/auth/reset-password', [
             'email' => 'test@example.com',
-            'code' => 'WRONGCODE',
-            'password' => 'NewPassword123!',
-            'password_confirmation' => 'NewPassword123!',
+            'code' => 'WRNG2345',
+            'password' => 'N3wP@ssw0rdTst7Xq',
+            'password_confirmation' => 'N3wP@ssw0rdTst7Xq',
         ]);
 
         $response->assertStatus(400);
@@ -116,7 +116,7 @@ class PasswordResetTest extends TestCase
     public function test_user_cannot_reset_password_with_expired_code(): void
     {
         $user = $this->createUser();
-        $code = 'ABCD1234';
+        $code = 'ABCD2345';
 
         PasswordResetCode::create([
             'email' => 'test@example.com',
@@ -131,8 +131,8 @@ class PasswordResetTest extends TestCase
         $response = $this->postJson('/api/auth/reset-password', [
             'email' => 'test@example.com',
             'code' => $code,
-            'password' => 'NewPassword123!',
-            'password_confirmation' => 'NewPassword123!',
+            'password' => 'N3wP@ssw0rdTst7Xq',
+            'password_confirmation' => 'N3wP@ssw0rdTst7Xq',
         ]);
 
         $response->assertStatus(400);
@@ -141,7 +141,7 @@ class PasswordResetTest extends TestCase
     public function test_password_reset_code_lockout_after_max_attempts(): void
     {
         $user = $this->createUser();
-        $code = 'ABCD1234';
+        $code = 'ABCD2345';
 
         PasswordResetCode::create([
             'email' => 'test@example.com',
@@ -157,9 +157,9 @@ class PasswordResetTest extends TestCase
         for ($i = 0; $i < 6; $i++) {
             $this->postJson('/api/auth/reset-password', [
                 'email' => 'test@example.com',
-                'code' => 'WRONGCODE',
-                'password' => 'NewPassword123!',
-                'password_confirmation' => 'NewPassword123!',
+                'code' => 'WRNG2345',
+                'password' => 'N3wP@ssw0rdTst7Xq',
+                'password_confirmation' => 'N3wP@ssw0rdTst7Xq',
             ]);
         }
 
@@ -167,8 +167,8 @@ class PasswordResetTest extends TestCase
         $response = $this->postJson('/api/auth/reset-password', [
             'email' => 'test@example.com',
             'code' => $code,
-            'password' => 'NewPassword123!',
-            'password_confirmation' => 'NewPassword123!',
+            'password' => 'N3wP@ssw0rdTst7Xq',
+            'password_confirmation' => 'N3wP@ssw0rdTst7Xq',
         ]);
 
         $response->assertStatus(429);

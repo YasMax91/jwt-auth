@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        // Only run if users table exists
+        if (!Schema::hasTable('users')) {
+            return;
+        }
+
         Schema::table('users', function (Blueprint $table) {
             if (!Schema::hasColumn('users', 'refresh_token')) {
                 $table->string('refresh_token')->nullable()->after('remember_token');
@@ -14,7 +19,12 @@ return new class extends Migration {
             }
 
             // Add email index if it doesn't exist
-            if (!Schema::hasIndex('users', 'users_email_index')) {
+            $indexes = Schema::getIndexes('users');
+            $hasEmailIndex = collect($indexes)->contains(function ($index) {
+                return in_array('email', $index['columns']);
+            });
+
+            if (!$hasEmailIndex) {
                 $table->index('email');
             }
         });
