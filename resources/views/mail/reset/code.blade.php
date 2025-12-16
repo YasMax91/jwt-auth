@@ -21,7 +21,17 @@
                 </tr>
                 <tr>
                     <td align="center" style="padding:24px 0;">
-                        <div style="display:inline-block; background:#F3F4F6; border-radius:10px; padding:18px 36px; font-size:28px; font-weight:700; letter-spacing:4px; font-family: monospace; color:#111827;">
+                        <div style="
+                                display:inline-block;
+                                background:#F3F4F6;
+                                border-radius:10px;
+                                padding:18px 36px;
+                                font-size:28px;
+                                font-weight:700;
+                                letter-spacing:4px;
+                                font-family: monospace;
+                                color:#111827;
+                            ">
                             {{ $code }}
                         </div>
                     </td>

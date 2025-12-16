@@ -20,8 +20,18 @@ class ResetPasswordRequest extends BaseApiRequest
     {
         return [
             'email' => 'required|email|max:255',
-            'code' => ['required','string','size:8','regex:/^[ABCDEFGHJKLMNPQRSTUVWXYZ2-9]{8}$/'],
-            'password' => ['required','confirmed', Password::defaults()],
+            // Allow A-Z except I,O + digits 2-9; length = 8 (L is ALLOWED!)
+            'code' => ['required', 'string', 'size:8', 'regex:/^[ABCDEFGHJKLMNPQRSTUVWXYZ2-9]{8}$/'],
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
+            ],
             'password_confirmation' => ['required'],
         ];
     }

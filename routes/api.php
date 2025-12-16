@@ -13,7 +13,6 @@ Route::prefix(config('ra-jwt-auth.route'))->group(function () {
         Route::post('login', 'login');
         Route::post('register', 'register');
         Route::post('forgot-password', 'forgot');
-        Route::post('can-reset-password', 'canReset');
         Route::post('reset-password', 'reset');
     });
 });

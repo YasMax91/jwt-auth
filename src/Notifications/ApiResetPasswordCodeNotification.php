@@ -23,18 +23,26 @@ class ApiResetPasswordCodeNotification extends Notification implements ShouldQue
     }
 
 
-    public function via(object $notifiable): array { return ['mail']; }
+    public function via(object $notifiable): array
+    {
+        return ['mail'];
+    }
 
 
     public function toMail(object $notifiable): MailMessage
     {
-        $minutes = max(1, (int) $this->expireMinutes);
-        $hours = intdiv($minutes, 60); $mins = $minutes % 60;
-        $parts = [];
-        if ($hours > 0) $parts[] = $hours.' '.($hours === 1 ? 'hour' : 'hours');
-        if ($mins > 0) $parts[] = $mins.' '.($mins === 1 ? 'minute' : 'minutes');
-        $expiresHuman = implode(' ', $parts);
+        $minutes = max(1, (int)$this->expireMinutes);
+        $hours = intdiv($minutes, 60);
+        $mins = $minutes % 60;
 
+        $parts = [];
+        if ($hours > 0) {
+            $parts[] = $hours . ' ' . ($hours === 1 ? 'hour' : 'hours');
+        }
+        if ($mins > 0) {
+            $parts[] = $mins . ' ' . ($mins === 1 ? 'minute' : 'minutes');
+        }
+        $expiresHuman = implode(' ', $parts);
 
         return (new MailMessage)
             ->subject(__('Reset Password Notification'))

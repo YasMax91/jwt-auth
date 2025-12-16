@@ -3,6 +3,7 @@
 namespace RaDevs\JwtAuth\Http\Controllers;
 
 
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
@@ -124,24 +125,20 @@ class AuthController
         return ApiJsonResponse::success([], $genericMessage);
     }
 
-    public function canReset(CanResetPasswordRequest $request): JsonResponse
+    public function reset(ResetPasswordRequest $request): JsonResponse
     {
         $data = $request->validated();
+
         $isValid = $this->passwordResetCodeService->verifyCode(
             email: $data['email'],
             code: $data['code'],
         );
 
-        return $isValid
-            ? ApiJsonResponse::success([], 'The password reset code is valid')
-            : ApiJsonResponse::error('The password reset code has expired or is invalid', 400);
-    }
+        if (!$isValid) {
+            ApiJsonResponse::error('The password reset code has expired or is invalid', 400);
+        }
 
-
-    public function reset(ResetPasswordRequest $request): JsonResponse
-    {
-        $data = $request->validated();
-
+        // Ensure user exists (service will also validate, but this gives clearer 404)
         $userModel = config('ra-jwt-auth.classes.user_model');
         $user = $userModel::query()->where('email', mb_strtolower($data['email']))->first();
         if (!$user) {
@@ -154,8 +151,8 @@ class AuthController
                 code: $data['code'],
                 newPassword: $data['password'],
             );
-        } catch (ValidationException $e) {
-            return ApiJsonResponse::error($e->getMessage(), 400);
+        } catch (ValidationException $validationException) {
+            return ApiJsonResponse::error($validationException->getMessage(), 400);
         }
 
         return ApiJsonResponse::success([], 'Password reset was successful!');
