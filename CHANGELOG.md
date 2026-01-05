@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-01-05
+
+### Added
+- Configurable registration fields via config file
+  - `registration.fields` configuration option for customizing validation rules
+  - `registration.exclude_from_create` option to exclude service fields from user creation
+  - Support for `{user_table}` placeholder in validation rules
+  - `RegisterRequest::getRegistrationData()` method for preparing user data
+- Enhanced documentation with examples for customizing registration fields
+
+### Changed
+- `RegisterRequest` now uses configurable fields with fallback to default rules
+- `AuthController::register()` now uses prepared registration data (excludes service fields)
+
+## [Unreleased]
+
 ### Added
 - Custom exception classes for better error handling
   - `JwtAuthException` base class
@@ -80,5 +96,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tymon/jwt-auth: ^2.0
 - ra-devs/api-json-response: ^1.0
 
-[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/ra-devs/jwt-auth/compare/v1.0.1...v1.1.0
 [1.0.0]: https://github.com/ra-devs/jwt-auth/releases/tag/v1.0.0
