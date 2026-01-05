@@ -210,24 +210,73 @@ Yes, configure it:
 
 ### How do I add custom fields to registration?
 
-1. Extend `RegisterRequest`:
+You have two options:
+
+#### Option 1: Configure fields in config file (Recommended for simple cases)
+
+Edit `config/ra-jwt-auth.php`:
+
+```php
+'registration' => [
+    'fields' => [
+        'email' => 'required|email:rfc,dns|unique:{user_table},email',
+        'first_name' => 'required|string|max:255',  // Changed from 'name'
+        'surname' => 'required|string|max:255',      // Changed from 'last_name'
+        'phone' => 'nullable|string|regex:/^\+\d{10,15}$/',  // Made optional
+        'company' => 'nullable|string|max:255',     // Added new field
+        'password' => 'required|confirmed|min:8',
+        'password_confirmation' => 'required_with:password',
+    ],
+    'exclude_from_create' => [
+        'password_confirmation',
+    ],
+],
+```
+
+Note: 
+- `{user_table}` will be automatically replaced with your actual user table name.
+- For complex validation rules (e.g., with `Password` objects), use Option 2 instead.
+
+#### Option 2: Extend RegisterRequest (Recommended for complex validation)
+
+Use this approach when you need complex validation rules (e.g., with `Password` objects) or want full control:
+
 ```php
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rules\Password;
 use RaDevs\JwtAuth\Http\Requests\Auth\RegisterRequest as BaseRequest;
 
 class CustomRegisterRequest extends BaseRequest
 {
     public function rules(): array
     {
-        return array_merge(parent::rules(), [
-            'custom_field' => 'required|string',
-        ]);
+        $userTable = (new (config('ra-jwt-auth.classes.user_model')))->getTable();
+        
+        return [
+            'email' => 'required|email:rfc,dns|unique:'.$userTable.',email',
+            'first_name' => 'required|string|max:255',
+            'surname' => 'required|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'password' => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()],
+            'password_confirmation' => 'required_with:password',
+        ];
     }
 }
 ```
 
-2. Use dependency injection in your route to use the custom request.
+Or merge with parent rules:
+
+```php
+public function rules(): array
+{
+    return array_merge(parent::rules(), [
+        'custom_field' => 'required|string',
+    ]);
+}
+```
+
+Then use dependency injection in your route to use the custom request.
 
 ### Can I add roles and permissions?
 

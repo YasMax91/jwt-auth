@@ -27,4 +27,26 @@ return [
         'password_reset_service' => RaDevs\JwtAuth\Services\PasswordResetCodeService::class,
         'notification' => RaDevs\JwtAuth\Notifications\ApiResetPasswordCodeNotification::class,
     ],
+
+    'registration' => [
+        // Поля, которые будут использоваться при регистрации
+        // Можно переопределить в своем RegisterRequest
+        // {user_table} будет автоматически заменен на реальное имя таблицы
+        // 
+        // ВАЖНО: Для сложных правил (например, с объектами Password) 
+        // рекомендуется расширять RegisterRequest вместо изменения конфига
+        'fields' => [
+            'email' => 'required|email:rfc,dns|unique:{user_table},email',
+            'name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'phone' => 'required|string|regex:/^\+\d{10,15}$/',
+            'password' => 'required|confirmed|min:8',
+            'password_confirmation' => 'required_with:password',
+        ],
+        // Поля, которые нужно исключить при создании пользователя
+        // (например, password_confirmation не должно попадать в БД)
+        'exclude_from_create' => [
+            'password_confirmation',
+        ],
+    ],
 ];

@@ -115,7 +115,7 @@ class AuthController
 
     public function register(RegisterRequest $request, IUserRepository $userRepository): JsonResponse
     {
-        $data = $request->validated();
+        $data = $request->getRegistrationData();
         $user = $userRepository->create($data);
 
         UserRegistered::dispatch($user, $request->ip(), $request->userAgent() ?? 'Unknown');
