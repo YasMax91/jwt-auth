@@ -36,21 +36,40 @@ class AuthController
     public function login(LoginRequest $request, IUserRepository $userRepository): JsonResponse
     {
         $credentials = $request->validated();
-        $loginField = $request->getLoginField();
-        $loginValue = $request->getLoginValue();
-
-        $user = $userRepository->getActivatedUserByField($loginField, $loginValue);
-        if (!$user) {
+        
+        // Пытаемся найти пользователя по полям поиска
+        $userData = $request->findUserBySearchFields($userRepository);
+        if (!$userData) {
+            $searchFields = $request->getSearchFields();
+            $attemptedValue = '';
+            foreach ($searchFields as $field) {
+                if (isset($credentials[$field]) && !empty($credentials[$field])) {
+                    $attemptedValue = $credentials[$field];
+                    break;
+                }
+            }
+            
             UserLoginFailed::dispatch(
-                $loginValue,
+                $attemptedValue,
                 $request->ip(),
                 $request->userAgent() ?? 'Unknown',
                 'User not found'
             );
-            throw new UserNotFoundException('The user with ' . $loginField . ' you entered does not exist');
+            throw new UserNotFoundException('The user you entered does not exist');
         }
 
-        if (!$token = $this->authRepository->attempt($credentials)) {
+        $user = $userData['user'];
+        $loginField = $userData['field'];
+        $loginValue = $userData['value'];
+
+        // Для attempt используем email пользователя и пароль из credentials
+        // JWT auth обычно работает с email, поэтому используем email найденного пользователя
+        $attemptCredentials = [
+            'email' => $user->email,
+            'password' => $credentials['password'],
+        ];
+
+        if (!$token = $this->authRepository->attempt($attemptCredentials)) {
             UserLoginFailed::dispatch(
                 $loginValue,
                 $request->ip(),

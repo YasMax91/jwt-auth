@@ -280,22 +280,44 @@ Then use dependency injection in your route to use the custom request.
 
 ### How do I customize login fields?
 
-You can configure login fields and change the login field (e.g., use `username` or `phone` instead of `email`):
+You can configure login to support multiple login fields (e.g., login with either `email`, `username`, or `phone`):
 
 Edit `config/ra-jwt-auth.php`:
 
 ```php
 'login' => [
-    // Field used for login (email, username, phone, etc.)
-    'field' => 'username',  // Change from 'email' to 'username'
+    // Fields to search for user (system will try each field until user is found)
+    'search_fields' => ['email', 'username', 'phone'],
+    // Validation rules - at least one of search_fields must be provided
     'fields' => [
-        'username' => 'required|string|max:255',  // Changed from 'email'
+        'email' => 'required_without_all:username,phone|email',
+        'username' => 'required_without_all:email,phone|string|max:255',
+        'phone' => 'required_without_all:email,username|string|regex:/^\+\d{10,15}$/',
         'password' => 'required|string|min:6',
     ],
 ],
 ```
 
-Or extend `LoginRequest`:
+**Example usage:**
+- User can login with: `{"email": "user@example.com", "password": "..."}`
+- Or with: `{"username": "johndoe", "password": "..."}`
+- Or with: `{"phone": "+1234567890", "password": "..."}`
+
+**Single field login:**
+
+If you only want one field (e.g., just `username`):
+
+```php
+'login' => [
+    'search_fields' => ['username'],
+    'fields' => [
+        'username' => 'required|string|max:255',
+        'password' => 'required|string|min:6',
+    ],
+],
+```
+
+Or extend `LoginRequest` for full control:
 
 ```php
 namespace App\Http\Requests;
@@ -307,14 +329,16 @@ class CustomLoginRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'username' => 'required|string|max:255',
+            'email' => 'required_without_all:username,phone|email',
+            'username' => 'required_without_all:email,phone|string|max:255',
+            'phone' => 'required_without_all:email,username|string|regex:/^\+\d{10,15}$/',
             'password' => 'required|string|min:6',
         ];
     }
 
-    public function getLoginField(): string
+    public function getSearchFields(): array
     {
-        return 'username';  // Override to use username instead of email
+        return ['email', 'username', 'phone'];
     }
 }
 ```

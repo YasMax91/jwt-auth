@@ -51,11 +51,15 @@ return [
     ],
 
     'login' => [
-        // Поле, которое используется для входа (email, username, phone и т.д.)
-        'field' => 'email',
+        // Поля, по которым можно искать пользователя при входе
+        // Система будет пробовать найти пользователя по каждому полю по очереди
+        'search_fields' => ['email'],
         // Правила валидации для полей входа
+        // Одно из полей из search_fields должно быть заполнено
         'fields' => [
-            'email' => 'required|email',
+            'email' => 'required_without_all:username,phone|email',
+            'username' => 'required_without_all:email,phone|string|max:255',
+            'phone' => 'required_without_all:email,username|string|regex:/^\+\d{10,15}$/',
             'password' => 'required|string|min:6',
         ],
     ],
