@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-01-12
+
+### Added
+- Support for multiple login fields (email, username, phone, etc.)
+  - `login.search_fields` configuration option to specify multiple fields for user search
+  - Automatic `required_without_all` validation for multiple login fields
+  - `LoginRequest::findUserBySearchFields()` method to find user by any configured field
+  - `LoginRequest::getSearchFields()` method to get list of search fields
+- Enhanced login flexibility - users can now login with email, username, phone, or any configured field
+
+### Changed
+- `LoginRequest` now supports multiple login fields with automatic validation
+- `AuthController::login()` now searches user by multiple fields instead of single field
+- Login validation automatically adjusts based on configured search fields
+
 ## [1.2.0] - 2026-01-12
 
 ### Added
@@ -117,7 +132,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tymon/jwt-auth: ^2.0
 - ra-devs/api-json-response: ^1.0
 
-[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/ra-devs/jwt-auth/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/ra-devs/jwt-auth/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/ra-devs/jwt-auth/compare/v1.0.1...v1.1.0
 [1.0.0]: https://github.com/ra-devs/jwt-auth/releases/tag/v1.0.0
