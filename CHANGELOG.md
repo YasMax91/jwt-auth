@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-01-12
+
+### Added
+- Configurable login fields and login field type
+  - `login.field` configuration option to change login field (email/username/phone)
+  - `login.fields` configuration option for customizing validation rules
+  - `LoginRequest::getLoginField()` and `getLoginValue()` methods
+- Configurable password reset fields
+  - `password_reset.fields` configuration option for customizing validation rules
+  - `password_reset.exclude_from_update` option to exclude service fields
+  - `ResetPasswordRequest::getResetData()` method for preparing reset data
+- Configurable forgot password fields
+  - `forgot_password.fields` configuration option for customizing validation rules
+- Enhanced documentation with examples for customizing login, password reset and forgot password fields
+
+### Changed
+- `LoginRequest` now uses configurable fields and supports custom login field types
+- `ResetPasswordRequest` now uses configurable fields with fallback to default rules
+- `ForgotRequest` now uses configurable fields with fallback to default rules
+- `AuthController::login()` now uses configurable login field instead of hardcoded 'email'
+
 ## [1.1.0] - 2026-01-05
 
 ### Added
@@ -96,6 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tymon/jwt-auth: ^2.0
 - ra-devs/api-json-response: ^1.0
 
-[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/ra-devs/jwt-auth/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/ra-devs/jwt-auth/compare/v1.0.1...v1.1.0
 [1.0.0]: https://github.com/ra-devs/jwt-auth/releases/tag/v1.0.0
