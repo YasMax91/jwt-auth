@@ -49,4 +49,36 @@ return [
             'password_confirmation',
         ],
     ],
+
+    'login' => [
+        // Поле, которое используется для входа (email, username, phone и т.д.)
+        'field' => 'email',
+        // Правила валидации для полей входа
+        'fields' => [
+            'email' => 'required|email',
+            'password' => 'required|string|min:6',
+        ],
+    ],
+
+    'password_reset' => [
+        // Правила валидации для сброса пароля
+        'fields' => [
+            'email' => 'required|email|max:255',
+            'code' => 'required|string|size:8|regex:/^[ABCDEFGHJKLMNPQRSTUVWXYZ2-9]{8}$/',
+            'password' => 'required|confirmed|min:8',
+            'password_confirmation' => 'required_with:password',
+        ],
+        // Поля, которые нужно исключить при обновлении пароля
+        'exclude_from_update' => [
+            'password_confirmation',
+            'code',
+        ],
+    ],
+
+    'forgot_password' => [
+        // Правила валидации для запроса сброса пароля
+        'fields' => [
+            'email' => 'required|email|max:255',
+        ],
+    ],
 ];

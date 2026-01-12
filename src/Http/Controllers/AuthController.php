@@ -36,22 +36,23 @@ class AuthController
     public function login(LoginRequest $request, IUserRepository $userRepository): JsonResponse
     {
         $credentials = $request->validated();
+        $loginField = $request->getLoginField();
+        $loginValue = $request->getLoginValue();
 
-
-        $user = $userRepository->getActivatedUserByField('email', $credentials['email']);
+        $user = $userRepository->getActivatedUserByField($loginField, $loginValue);
         if (!$user) {
             UserLoginFailed::dispatch(
-                $credentials['email'],
+                $loginValue,
                 $request->ip(),
                 $request->userAgent() ?? 'Unknown',
                 'User not found'
             );
-            throw new UserNotFoundException('The user with email address you entered does not exist');
+            throw new UserNotFoundException('The user with ' . $loginField . ' you entered does not exist');
         }
 
         if (!$token = $this->authRepository->attempt($credentials)) {
             UserLoginFailed::dispatch(
-                $credentials['email'],
+                $loginValue,
                 $request->ip(),
                 $request->userAgent() ?? 'Unknown',
                 'Invalid credentials'

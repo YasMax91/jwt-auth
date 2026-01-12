@@ -278,6 +278,78 @@ public function rules(): array
 
 Then use dependency injection in your route to use the custom request.
 
+### How do I customize login fields?
+
+You can configure login fields and change the login field (e.g., use `username` or `phone` instead of `email`):
+
+Edit `config/ra-jwt-auth.php`:
+
+```php
+'login' => [
+    // Field used for login (email, username, phone, etc.)
+    'field' => 'username',  // Change from 'email' to 'username'
+    'fields' => [
+        'username' => 'required|string|max:255',  // Changed from 'email'
+        'password' => 'required|string|min:6',
+    ],
+],
+```
+
+Or extend `LoginRequest`:
+
+```php
+namespace App\Http\Requests;
+
+use RaDevs\JwtAuth\Http\Requests\Auth\LoginRequest as BaseRequest;
+
+class CustomLoginRequest extends BaseRequest
+{
+    public function rules(): array
+    {
+        return [
+            'username' => 'required|string|max:255',
+            'password' => 'required|string|min:6',
+        ];
+    }
+
+    public function getLoginField(): string
+    {
+        return 'username';  // Override to use username instead of email
+    }
+}
+```
+
+### How do I customize password reset fields?
+
+Edit `config/ra-jwt-auth.php`:
+
+```php
+'password_reset' => [
+    'fields' => [
+        'email' => 'required|email|max:255',
+        'code' => 'required|string|size:8|regex:/^[ABCDEFGHJKLMNPQRSTUVWXYZ2-9]{8}$/',
+        'password' => 'required|confirmed|min:10',  // Changed min length
+        'password_confirmation' => 'required_with:password',
+    ],
+    'exclude_from_update' => [
+        'password_confirmation',
+        'code',
+    ],
+],
+```
+
+### How do I customize forgot password fields?
+
+Edit `config/ra-jwt-auth.php`:
+
+```php
+'forgot_password' => [
+    'fields' => [
+        'email' => 'required|email|max:255',
+    ],
+],
+```
+
 ### Can I add roles and permissions?
 
 Yes! Extend the `UserResource` to include roles:
