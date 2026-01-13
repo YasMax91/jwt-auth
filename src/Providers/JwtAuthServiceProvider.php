@@ -29,14 +29,16 @@ class JwtAuthServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        $basePath = dirname(__DIR__, 2);
+        
         // Publish configuration
-        $configPath = realpath(__DIR__.'/../../config/ra-jwt-auth.php');
+        $configPath = $basePath.'/config/ra-jwt-auth.php';
         $this->publishes([
             $configPath => config_path('ra-jwt-auth.php'),
         ], 'ra-jwt-auth-config');
 
         // Publish views
-        $viewsPath = realpath(__DIR__.'/../../resources/views') ?: __DIR__.'/../../resources/views';
+        $viewsPath = $basePath.'/resources/views';
         $this->publishes([
             $viewsPath => resource_path('views/vendor/ra-jwt-auth'),
         ], 'ra-jwt-auth-views');
@@ -44,13 +46,13 @@ class JwtAuthServiceProvider extends ServiceProvider
         $this->loadViewsFrom($viewsPath, 'ra-jwt-auth');
 
         // Publish migrations
-        $migrationsPath = realpath(__DIR__.'/../../database/migrations') ?: __DIR__.'/../../database/migrations';
+        $migrationsPath = $basePath.'/database/migrations';
         $this->publishesMigrations([
             $migrationsPath => database_path('migrations'),
         ], 'ra-jwt-auth-migrations');
 
         // Load routes
-        $routesPath = realpath(__DIR__.'/../../routes/api.php') ?: __DIR__.'/../../routes/api.php';
+        $routesPath = $basePath.'/routes/api.php';
         $this->loadRoutesFrom($routesPath);
     }
 }
