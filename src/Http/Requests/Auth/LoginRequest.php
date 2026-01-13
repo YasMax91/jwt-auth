@@ -40,9 +40,10 @@ class LoginRequest extends BaseApiRequest
         }
 
         // Fallback на дефолтные правила, если конфиг не настроен
+        $passwordMinLength = config('ra-jwt-auth.validation.password.min_length_login', 6);
         return [
             'email' => 'required|email',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:'.$passwordMinLength,
         ];
     }
 

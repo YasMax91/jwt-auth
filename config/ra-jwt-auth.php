@@ -8,13 +8,13 @@ return [
     ],
 
     'refresh_cookie' => [
-        'name' => 'refresh_token',
-        'minutes' => 60 * 24, // 1 day
-        'secure' => null, // null = keep Laravel default; true/false to force
-        'http_only' => true,
-        'same_site' => null, // 'lax'|'strict'|'none'|null
-        'path' => '/',
-        'domain' => null,
+        'name' => env('RA_JWT_AUTH_REFRESH_COOKIE_NAME', 'refresh_token'),
+        'minutes' => env('RA_JWT_AUTH_REFRESH_COOKIE_MINUTES', 60 * 24), // 1 day
+        'secure' => env('RA_JWT_AUTH_REFRESH_COOKIE_SECURE', null), // null = keep Laravel default; true/false to force
+        'http_only' => env('RA_JWT_AUTH_REFRESH_COOKIE_HTTP_ONLY', true),
+        'same_site' => env('RA_JWT_AUTH_REFRESH_COOKIE_SAME_SITE', null), // 'lax'|'strict'|'none'|null
+        'path' => env('RA_JWT_AUTH_REFRESH_COOKIE_PATH', '/'),
+        'domain' => env('RA_JWT_AUTH_REFRESH_COOKIE_DOMAIN', null),
     ],
 
     'classes' => [
@@ -66,7 +66,13 @@ return [
 
     'password_reset' => [
         // Длина кода для сброса пароля
-        'code_length' => 8,
+        'code_length' => env('RA_JWT_AUTH_PASSWORD_RESET_CODE_LENGTH', 8),
+        // Алфавит для генерации кода (без I, O, 0, 1 для избежания путаницы)
+        'code_alphabet' => env('RA_JWT_AUTH_PASSWORD_RESET_CODE_ALPHABET', 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'),
+        // Максимальное количество попыток ввода кода
+        'max_attempts' => env('RA_JWT_AUTH_PASSWORD_RESET_MAX_ATTEMPTS', 5),
+        // Минимальный интервал между запросами кода (в секундах)
+        'rate_limit_seconds' => env('RA_JWT_AUTH_PASSWORD_RESET_RATE_LIMIT_SECONDS', 60),
         // Правила валидации для сброса пароля
         'fields' => [
             'email' => 'required|email|max:255',
@@ -85,6 +91,36 @@ return [
         // Правила валидации для запроса сброса пароля
         'fields' => [
             'email' => 'required|email|max:255',
+        ],
+    ],
+
+    'rate_limits' => [
+        // Rate limits для эндпоинтов (попыток в минуту)
+        'login' => env('RA_JWT_AUTH_RATE_LIMIT_LOGIN', 5),
+        'register' => env('RA_JWT_AUTH_RATE_LIMIT_REGISTER', 3),
+        'forgot_password' => env('RA_JWT_AUTH_RATE_LIMIT_FORGOT_PASSWORD', 3),
+        'reset_password' => env('RA_JWT_AUTH_RATE_LIMIT_RESET_PASSWORD', 3),
+        'refresh' => env('RA_JWT_AUTH_RATE_LIMIT_REFRESH', 10),
+    ],
+
+    'validation' => [
+        // Общие правила валидации
+        'password' => [
+            'min_length' => env('RA_JWT_AUTH_PASSWORD_MIN_LENGTH', 8),
+            'min_length_login' => env('RA_JWT_AUTH_PASSWORD_MIN_LENGTH_LOGIN', 6), // Минимальная длина для логина (обычно менее строгая)
+            'require_letters' => env('RA_JWT_AUTH_PASSWORD_REQUIRE_LETTERS', true),
+            'require_mixed_case' => env('RA_JWT_AUTH_PASSWORD_REQUIRE_MIXED_CASE', true),
+            'require_numbers' => env('RA_JWT_AUTH_PASSWORD_REQUIRE_NUMBERS', true),
+            'require_symbols' => env('RA_JWT_AUTH_PASSWORD_REQUIRE_SYMBOLS', true),
+        ],
+        'email' => [
+            'max_length' => env('RA_JWT_AUTH_EMAIL_MAX_LENGTH', 255),
+        ],
+        'name' => [
+            'max_length' => env('RA_JWT_AUTH_NAME_MAX_LENGTH', 255),
+        ],
+        'phone' => [
+            'pattern' => env('RA_JWT_AUTH_PHONE_PATTERN', '/^\+\d{10,15}$/'),
         ],
     ],
 ];

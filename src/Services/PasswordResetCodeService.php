@@ -22,7 +22,7 @@ class PasswordResetCodeService
 
     private function generateCode(int $length): string
     {
-        $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $alphabet = config('ra-jwt-auth.password_reset.code_alphabet', 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789');
         $alphabetLength = strlen($alphabet);
         $result = '';
         for ($i = 0; $i < $length; $i++) {
@@ -35,8 +35,9 @@ class PasswordResetCodeService
 
     public function issueCode(string $email, ?string $ipAddress = null, ?string $userAgent = null, int $ttlMinutes = 60): void
     {
+        $rateLimitSeconds = config('ra-jwt-auth.password_reset.rate_limit_seconds', 60);
         $last = PasswordResetCode::where('email', mb_strtolower($email))->latest('id')->first();
-        if ($last && $last->created_at->diffInSeconds(now()) < 60) {
+        if ($last && $last->created_at->diffInSeconds(now()) < $rateLimitSeconds) {
             throw PasswordResetException::rateLimited();
         }
 
@@ -50,11 +51,12 @@ class PasswordResetCodeService
         $normalized = strtoupper($rawCode);
 
 
+        $maxAttempts = config('ra-jwt-auth.password_reset.max_attempts', 5);
         PasswordResetCode::create([
             'email' => mb_strtolower($email),
             'code_hash' => Hash::make($normalized),
             'attempts' => 0,
-            'max_attempts' => 5,
+            'max_attempts' => $maxAttempts,
             'expires_at' => now()->addMinutes($ttlMinutes),
             'ip_address' => $ipAddress,
             'user_agent' => $userAgent,

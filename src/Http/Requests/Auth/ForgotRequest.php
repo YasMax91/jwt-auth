@@ -16,8 +16,9 @@ class ForgotRequest extends BaseApiRequest
         }
 
         // Fallback на дефолтные правила, если конфиг не настроен
+        $emailMaxLength = config('ra-jwt-auth.validation.email.max_length', 255);
         return [
-            'email' => 'required|email|max:255',
+            'email' => 'required|email|max:'.$emailMaxLength,
         ];
     }
 }

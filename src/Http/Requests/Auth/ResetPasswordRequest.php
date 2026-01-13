@@ -20,37 +20,53 @@ class ResetPasswordRequest extends BaseApiRequest
     {
         $configFields = config('ra-jwt-auth.password_reset.fields', []);
         $codeLength = config('ra-jwt-auth.password_reset.code_length', 8);
+        $codeAlphabet = config('ra-jwt-auth.password_reset.code_alphabet', 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789');
+        $codeAlphabetEscaped = preg_quote($codeAlphabet, '/');
 
         // Если в конфиге есть поля, используем их, но обновляем правило для code
         if (!empty($configFields)) {
-            // Динамически обновляем правило валидации кода на основе длины из конфига
+            // Динамически обновляем правило валидации кода на основе длины и алфавита из конфига
             $configFields['code'] = [
                 'required',
                 'string',
                 "size:{$codeLength}",
-                "regex:/^[ABCDEFGHJKLMNPQRSTUVWXYZ2-9]{{$codeLength}}$/",
+                "regex:/^[{$codeAlphabetEscaped}]{{$codeLength}}$/",
             ];
             return $configFields;
         }
 
         // Fallback на дефолтные правила, если конфиг не настроен
+        $passwordMinLength = config('ra-jwt-auth.validation.password.min_length', 8);
+        $passwordRules = Password::min($passwordMinLength);
+        
+        if (config('ra-jwt-auth.validation.password.require_letters', true)) {
+            $passwordRules = $passwordRules->letters();
+        }
+        if (config('ra-jwt-auth.validation.password.require_mixed_case', true)) {
+            $passwordRules = $passwordRules->mixedCase();
+        }
+        if (config('ra-jwt-auth.validation.password.require_numbers', true)) {
+            $passwordRules = $passwordRules->numbers();
+        }
+        if (config('ra-jwt-auth.validation.password.require_symbols', true)) {
+            $passwordRules = $passwordRules->symbols();
+        }
+
+        $emailMaxLength = config('ra-jwt-auth.validation.email.max_length', 255);
+
         return [
-            'email' => 'required|email|max:255',
-            // Allow A-Z except I,O + digits 2-9; длина берется из конфига
+            'email' => 'required|email|max:'.$emailMaxLength,
+            // Код использует алфавит и длину из конфига
             'code' => [
                 'required',
                 'string',
                 "size:{$codeLength}",
-                "regex:/^[ABCDEFGHJKLMNPQRSTUVWXYZ2-9]{{$codeLength}}$/",
+                "regex:/^[{$codeAlphabetEscaped}]{{$codeLength}}$/",
             ],
             'password' => [
                 'required',
                 'confirmed',
-                Password::min(8)
-                    ->letters()
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols(),
+                $passwordRules,
             ],
             'password_confirmation' => ['required'],
         ];

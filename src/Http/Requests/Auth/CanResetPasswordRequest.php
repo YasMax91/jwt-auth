@@ -18,9 +18,19 @@ class CanResetPasswordRequest extends BaseApiRequest
 
     public function rules(): array
     {
+        $codeLength = config('ra-jwt-auth.password_reset.code_length', 8);
+        $codeAlphabet = config('ra-jwt-auth.password_reset.code_alphabet', 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789');
+        $codeAlphabetEscaped = preg_quote($codeAlphabet, '/');
+        $emailMaxLength = config('ra-jwt-auth.validation.email.max_length', 255);
+
         return [
-            'email' => 'required|email|max:255',
-            'code' => ['required','string','size:8','regex:/^[ABCDEFGHJKLMNPQRSTUVWXYZ2-9]{8}$/'],
+            'email' => 'required|email|max:'.$emailMaxLength,
+            'code' => [
+                'required',
+                'string',
+                "size:{$codeLength}",
+                "regex:/^[{$codeAlphabetEscaped}]{{$codeLength}}$/",
+            ],
         ];
     }
 }
