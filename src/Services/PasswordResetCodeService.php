@@ -14,7 +14,10 @@ use RaDevs\JwtAuth\Models\PasswordResetCode;
 
 class PasswordResetCodeService
 {
-    private int $codeLength = 8;
+    private function getCodeLength(): int
+    {
+        return config('ra-jwt-auth.password_reset.code_length', 8);
+    }
 
 
     private function generateCode(int $length): string
@@ -43,7 +46,7 @@ class PasswordResetCodeService
             ->update(['expires_at' => now()]);
 
 
-        $rawCode = $this->generateCode($this->codeLength);
+        $rawCode = $this->generateCode($this->getCodeLength());
         $normalized = strtoupper($rawCode);
 
 

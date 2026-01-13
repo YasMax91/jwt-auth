@@ -65,6 +65,8 @@ return [
     ],
 
     'password_reset' => [
+        // Длина кода для сброса пароля
+        'code_length' => 8,
         // Правила валидации для сброса пароля
         'fields' => [
             'email' => 'required|email|max:255',

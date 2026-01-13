@@ -19,17 +19,30 @@ class ResetPasswordRequest extends BaseApiRequest
     public function rules(): array
     {
         $configFields = config('ra-jwt-auth.password_reset.fields', []);
+        $codeLength = config('ra-jwt-auth.password_reset.code_length', 8);
 
-        // Если в конфиге есть поля, используем их
+        // Если в конфиге есть поля, используем их, но обновляем правило для code
         if (!empty($configFields)) {
+            // Динамически обновляем правило валидации кода на основе длины из конфига
+            $configFields['code'] = [
+                'required',
+                'string',
+                "size:{$codeLength}",
+                "regex:/^[ABCDEFGHJKLMNPQRSTUVWXYZ2-9]{{$codeLength}}$/",
+            ];
             return $configFields;
         }
 
         // Fallback на дефолтные правила, если конфиг не настроен
         return [
             'email' => 'required|email|max:255',
-            // Allow A-Z except I,O + digits 2-9; length = 8 (L is ALLOWED!)
-            'code' => ['required', 'string', 'size:8', 'regex:/^[ABCDEFGHJKLMNPQRSTUVWXYZ2-9]{8}$/'],
+            // Allow A-Z except I,O + digits 2-9; длина берется из конфига
+            'code' => [
+                'required',
+                'string',
+                "size:{$codeLength}",
+                "regex:/^[ABCDEFGHJKLMNPQRSTUVWXYZ2-9]{{$codeLength}}$/",
+            ],
             'password' => [
                 'required',
                 'confirmed',
@@ -37,8 +50,7 @@ class ResetPasswordRequest extends BaseApiRequest
                     ->letters()
                     ->mixedCase()
                     ->numbers()
-                    ->symbols()
-                    ->uncompromised(),
+                    ->symbols(),
             ],
             'password_confirmation' => ['required'],
         ];

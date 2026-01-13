@@ -37,7 +37,7 @@ class RegisterRequest extends BaseApiRequest
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'phone' => 'required|string|regex:/^\+\d{10,15}$/',
-            'password' => ['required','confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()],
+            'password' => ['required','confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'password_confirmation' => 'required_with:password',
         ];
     }
