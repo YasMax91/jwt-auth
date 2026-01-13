@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-01-13
+
+### Added
+- Configurable password reset code length
+  - `password_reset.code_length` configuration option (default: 8)
+  - Dynamic code validation based on configured length
+
+### Changed
+- `PasswordResetCodeService` now uses configurable code length instead of hardcoded value
+- `ResetPasswordRequest` now validates code length dynamically based on configuration
+- Removed `uncompromised()` password validation from registration and password reset (can cause external API calls)
+
 ## [1.3.0] - 2026-01-12
 
 ### Added
@@ -132,7 +144,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tymon/jwt-auth: ^2.0
 - ra-devs/api-json-response: ^1.0
 
-[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/ra-devs/jwt-auth/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/ra-devs/jwt-auth/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/ra-devs/jwt-auth/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/ra-devs/jwt-auth/compare/v1.0.1...v1.1.0
