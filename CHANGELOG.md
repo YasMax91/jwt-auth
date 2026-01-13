@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-01-13
+
+### Changed
+- Improved `JwtAuthServiceProvider` reliability
+  - Use `dirname()` for package path resolution instead of hardcoded paths
+  - Add file/directory existence checks before publishing resources
+  - Use `publishesMigrations()` method for migrations
+  - Add safety checks before loading views and routes
+
 ## [1.4.1] - 2026-01-13
 
 ### Changed
@@ -201,7 +210,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tymon/jwt-auth: ^2.0
 - ra-devs/api-json-response: ^1.0
 
-[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.4.2...HEAD
+[1.4.2]: https://github.com/ra-devs/jwt-auth/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/ra-devs/jwt-auth/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/ra-devs/jwt-auth/compare/v1.3.2...v1.4.0
 [1.3.2]: https://github.com/ra-devs/jwt-auth/compare/v1.3.1...v1.3.2
