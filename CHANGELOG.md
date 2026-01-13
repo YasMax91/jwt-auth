@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-01-13
+
+### Added
+- Environment variable configuration for all package settings
+  - Refresh cookie configuration via env variables:
+    - `RA_JWT_AUTH_REFRESH_COOKIE_NAME`
+    - `RA_JWT_AUTH_REFRESH_COOKIE_MINUTES`
+    - `RA_JWT_AUTH_REFRESH_COOKIE_SECURE`
+    - `RA_JWT_AUTH_REFRESH_COOKIE_HTTP_ONLY`
+    - `RA_JWT_AUTH_REFRESH_COOKIE_SAME_SITE`
+    - `RA_JWT_AUTH_REFRESH_COOKIE_PATH`
+    - `RA_JWT_AUTH_REFRESH_COOKIE_DOMAIN`
+  - Password reset configuration via env variables:
+    - `RA_JWT_AUTH_PASSWORD_RESET_CODE_LENGTH`
+    - `RA_JWT_AUTH_PASSWORD_RESET_CODE_ALPHABET`
+    - `RA_JWT_AUTH_PASSWORD_RESET_MAX_ATTEMPTS`
+    - `RA_JWT_AUTH_PASSWORD_RESET_RATE_LIMIT_SECONDS`
+  - Rate limits configuration via env variables:
+    - `RA_JWT_AUTH_RATE_LIMIT_LOGIN`
+    - `RA_JWT_AUTH_RATE_LIMIT_REGISTER`
+    - `RA_JWT_AUTH_RATE_LIMIT_FORGOT_PASSWORD`
+    - `RA_JWT_AUTH_RATE_LIMIT_RESET_PASSWORD`
+    - `RA_JWT_AUTH_RATE_LIMIT_REFRESH`
+  - Validation rules configuration via env variables:
+    - Password: `RA_JWT_AUTH_PASSWORD_MIN_LENGTH`, `RA_JWT_AUTH_PASSWORD_MIN_LENGTH_LOGIN`, `RA_JWT_AUTH_PASSWORD_REQUIRE_LETTERS`, `RA_JWT_AUTH_PASSWORD_REQUIRE_MIXED_CASE`, `RA_JWT_AUTH_PASSWORD_REQUIRE_NUMBERS`, `RA_JWT_AUTH_PASSWORD_REQUIRE_SYMBOLS`
+    - Email: `RA_JWT_AUTH_EMAIL_MAX_LENGTH`
+    - Name: `RA_JWT_AUTH_NAME_MAX_LENGTH`
+    - Phone: `RA_JWT_AUTH_PHONE_PATTERN`
+
+### Changed
+- All Request classes now use configurable validation rules from config/env
+- `PasswordResetCodeService` now uses configurable settings for code generation and rate limiting
+- Rate limits in routes now use configurable values from config
+- Password validation rules are now fully configurable (can disable requirements individually)
+- Code validation in `ResetPasswordRequest` and `CanResetPasswordRequest` now uses configurable alphabet
+
 ## [1.3.2] - 2026-01-13
 
 ### Security
@@ -155,7 +191,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tymon/jwt-auth: ^2.0
 - ra-devs/api-json-response: ^1.0
 
-[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/ra-devs/jwt-auth/compare/v1.3.2...v1.4.0
 [1.3.2]: https://github.com/ra-devs/jwt-auth/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/ra-devs/jwt-auth/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/ra-devs/jwt-auth/compare/v1.2.0...v1.3.0
