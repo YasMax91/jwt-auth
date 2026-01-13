@@ -29,22 +29,38 @@ class JwtAuthServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        $this->publishes([
-            __DIR__.'/../../config/ra-jwt-auth.php' => config_path('ra-jwt-auth.php'),
-        ], 'ra-jwt-auth-config');
+        $packagePath = dirname(__DIR__, 2);
+        
+        // Publish configuration
+        $configPath = $packagePath.'/config/ra-jwt-auth.php';
+        if (file_exists($configPath)) {
+            $this->publishes([
+                $configPath => config_path('ra-jwt-auth.php'),
+            ], 'ra-jwt-auth-config');
+        }
 
+        // Publish views
+        $viewsPath = $packagePath.'/resources/views';
+        if (is_dir($viewsPath)) {
+            $this->publishes([
+                $viewsPath => resource_path('views/vendor/ra-jwt-auth'),
+            ], 'ra-jwt-auth-views');
+            
+            $this->loadViewsFrom($viewsPath, 'ra-jwt-auth');
+        }
 
-        $this->publishes([
-            __DIR__.'/../../resources/views' => resource_path('views/vendor/ra-jwt-auth'),
-        ], 'ra-jwt-auth-views');
+        // Publish migrations
+        $migrationsPath = $packagePath.'/database/migrations';
+        if (is_dir($migrationsPath)) {
+            $this->publishesMigrations([
+                $migrationsPath => database_path('migrations'),
+            ], 'ra-jwt-auth-migrations');
+        }
 
-
-        $this->publishes([
-            __DIR__.'/../../database/migrations' => database_path('migrations'),
-        ], 'ra-jwt-auth-migrations');
-
-
-        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'ra-jwt-auth');
-        $this->loadRoutesFrom(__DIR__.'/../../routes/api.php');
+        // Load routes
+        $routesPath = $packagePath.'/routes/api.php';
+        if (file_exists($routesPath)) {
+            $this->loadRoutesFrom($routesPath);
+        }
     }
 }
