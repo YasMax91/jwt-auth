@@ -29,38 +29,28 @@ class JwtAuthServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        $packagePath = dirname(__DIR__, 2);
-        
         // Publish configuration
-        $configPath = $packagePath.'/config/ra-jwt-auth.php';
-        if (file_exists($configPath)) {
-            $this->publishes([
-                $configPath => config_path('ra-jwt-auth.php'),
-            ], 'ra-jwt-auth-config');
-        }
+        $configPath = realpath(__DIR__.'/../../config/ra-jwt-auth.php');
+        $this->publishes([
+            $configPath => config_path('ra-jwt-auth.php'),
+        ], 'ra-jwt-auth-config');
 
         // Publish views
-        $viewsPath = $packagePath.'/resources/views';
-        if (is_dir($viewsPath)) {
-            $this->publishes([
-                $viewsPath => resource_path('views/vendor/ra-jwt-auth'),
-            ], 'ra-jwt-auth-views');
-            
-            $this->loadViewsFrom($viewsPath, 'ra-jwt-auth');
-        }
+        $viewsPath = realpath(__DIR__.'/../../resources/views') ?: __DIR__.'/../../resources/views';
+        $this->publishes([
+            $viewsPath => resource_path('views/vendor/ra-jwt-auth'),
+        ], 'ra-jwt-auth-views');
+        
+        $this->loadViewsFrom($viewsPath, 'ra-jwt-auth');
 
         // Publish migrations
-        $migrationsPath = $packagePath.'/database/migrations';
-        if (is_dir($migrationsPath)) {
-            $this->publishesMigrations([
-                $migrationsPath => database_path('migrations'),
-            ], 'ra-jwt-auth-migrations');
-        }
+        $migrationsPath = realpath(__DIR__.'/../../database/migrations') ?: __DIR__.'/../../database/migrations';
+        $this->publishesMigrations([
+            $migrationsPath => database_path('migrations'),
+        ], 'ra-jwt-auth-migrations');
 
         // Load routes
-        $routesPath = $packagePath.'/routes/api.php';
-        if (file_exists($routesPath)) {
-            $this->loadRoutesFrom($routesPath);
-        }
+        $routesPath = realpath(__DIR__.'/../../routes/api.php') ?: __DIR__.'/../../routes/api.php';
+        $this->loadRoutesFrom($routesPath);
     }
 }
