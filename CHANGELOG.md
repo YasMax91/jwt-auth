@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.4] - 2026-01-13
+
+### Changed
+- Further simplified `JwtAuthServiceProvider` code
+  - Use `dirname()` for base path calculation
+  - Remove `realpath()` calls for cleaner code
+  - Use consistent path resolution approach
+
 ## [1.4.3] - 2026-01-13
 
 ### Changed
@@ -218,7 +226,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tymon/jwt-auth: ^2.0
 - ra-devs/api-json-response: ^1.0
 
-[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.4.3...HEAD
+[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.4.4...HEAD
+[1.4.4]: https://github.com/ra-devs/jwt-auth/compare/v1.4.3...v1.4.4
 [1.4.3]: https://github.com/ra-devs/jwt-auth/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/ra-devs/jwt-auth/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/ra-devs/jwt-auth/compare/v1.4.0...v1.4.1
