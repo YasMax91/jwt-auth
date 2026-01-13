@@ -150,12 +150,11 @@ class AuthController
     public function forgot(ForgotRequest $request): JsonResponse
     {
         $email = mb_strtolower(trim($request->input('email')));
-        $genericMessage = 'If the email exists, the code has been sent';
 
         $userModel = config('ra-jwt-auth.classes.user_model');
         $userExists = $userModel::query()->where('email', $email)->exists();
         if (!$userExists) {
-            return ApiJsonResponse::success([], $genericMessage);
+            throw new UserNotFoundException('User with this email does not exist');
         }
 
         $ttlMinutes = (int) (config('auth.passwords.' . config('auth.defaults.passwords') . '.expire') ?? 60);
@@ -169,7 +168,7 @@ class AuthController
             ttlMinutes: $ttlMinutes,
         );
 
-        return ApiJsonResponse::success([], $genericMessage);
+        return ApiJsonResponse::success([], 'The code has been sent');
     }
 
     public function reset(ResetPasswordRequest $request): JsonResponse
