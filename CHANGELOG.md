@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-01-13
+
+### Changed
+- Improved README documentation with better formatting, badges, and table of contents
+- Updated phpunit requirement from `^10.0` to `^10.5`
+- Updated TESTING.md to reflect all tests passing (21/21 tests, 57 assertions)
+
+### Fixed
+- Fixed migration path in `JwtAuthServiceProvider` (removed trailing slash)
+
 ## [1.4.0] - 2026-01-13
 
 ### Added
@@ -191,7 +201,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tymon/jwt-auth: ^2.0
 - ra-devs/api-json-response: ^1.0
 
-[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/ra-devs/jwt-auth/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/ra-devs/jwt-auth/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/ra-devs/jwt-auth/compare/v1.3.2...v1.4.0
 [1.3.2]: https://github.com/ra-devs/jwt-auth/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/ra-devs/jwt-auth/compare/v1.3.0...v1.3.1
